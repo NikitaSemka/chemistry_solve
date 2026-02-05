@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Формулы по химии</title>
+    <meta name="description" content="Уравнивание формул">
+    <link rel="stylesheet" href="main.css">
+    <style>
+        body {
+            background: #fff;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 24px 28px 40px;
+            box-shadow: 0 0 2px rgba(0,0,0,0.08);
+            color: #333;
+        }
+        h1 { margin-bottom: 12px; }
+        h2 { margin-top: 18px; margin-bottom: 10px; }
+        .input {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 16px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 12px;
+            padding: 9px 22px;
+            font-size: 15px;
+            color: #fff;
+            background: #505254;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+        button:hover { background: #000; transform: translateY(-2px); }
+        button:active { background: #222; transform: translateY(0); }
+        #result {
+            margin-top: 18px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        .block-title { font-weight: 600; margin-top: 8px; }
+    </style>
+</head>
+
+<body>
+
+    <h1>Уравнивание химических формул</h1>
+    <h2>Введите формулу ниже:</h2>
+
+    <input type="text" id="myInput" placeholder="2H2 + 3O2 = 4H2O" class="input">
+
+    <button onclick="getText()">Нажми чтобы рассчитать</button>
+
+    <div id="result">Итог: ...</div>
+
+    <script>
+        function dictToHTML(dict) {
+            let html = "";
+            for (let key in dict) {
+                html += `${key}: ${dict[key]}<br>`;
+            }
+            return html || "нет элементов";
+        }
+
+        function parse(side) {
+            const parts = side.replace(/\+/g, " ").trim().split(/\s+/);
+            const lib = {};
+
+            for (let part of parts) {
+                if (!part) continue;
+
+                // коэффициент перед формулой
+                let coefMatch = part.match(/^(\d+)?(.*)$/);
+                let coef = coefMatch[1] ? parseInt(coefMatch[1]) : 1;
+                let formula = coefMatch[2];
+
+                // элементы и индексы
+                let matches = formula.matchAll(/([A-Z][a-z]?)(\d*)/g);
+
+                for (let match of matches) {
+                    let elem = match[1];
+                    let num = match[2] ? parseInt(match[2]) : 1;
+                    lib[elem] = (lib[elem] || 0) + num * coef;
+                }
+            }
+            return lib;
+        }
+
+        function getText() {
+            const text = document.getElementById("myInput").value.trim();
+            const result = document.getElementById("result");
+
+            if (!text.includes("=")) {
+                result.innerHTML = "Ошибка: формула должна содержать знак «=». Пример: <b>2H2 + O2 = 2H2O</b>";
+                return;
+            }
+
+            const [left, right] = text.split("=");
+
+            const leftDict = parse(left);
+            const rightDict = parse(right);
+
+            result.innerHTML =
+                `<div class="block-title">Левая часть:</div>${dictToHTML(leftDict)}` +
+                `<div class="block-title">Правая часть:</div>${dictToHTML(rightDict)}`;
+        }
+    </script>
+
+</body>
+</html>
